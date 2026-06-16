@@ -9,7 +9,7 @@ def list_cohorts():
     data = supabase.table("cohorts").select("*").order("start_date", desc=True).execute().data
     result = []
     for c in data:
-        leads = supabase.table("cohort_leads").select("*, leads(name,score,standing)").eq("cohort_id", c["id"]).execute().data
+        leads = supabase.table("cohort_leads").select("*, leads(name,score)").eq("cohort_id", c["id"]).execute().data
         c["lead_count"] = len(leads)
         c["standings"] = {
             "Confirmed": sum(1 for l in leads if l["standing"] == "Confirmed"),
