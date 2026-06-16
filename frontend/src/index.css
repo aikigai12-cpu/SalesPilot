@@ -1,5 +1,4 @@
 *{margin:0;padding:0;box-sizing:border-box;}
-html{font-size:18px;}
 :root{
   --bg:#0d0f18;--bg2:#13151f;--bg3:#1a1d2b;--bg4:#20243a;
   --border:#252838;--border2:#2e3248;
@@ -8,7 +7,7 @@ html{font-size:18px;}
   --blue:#4f8ef7;--yellow:#f5c518;--red:#ef4444;--purple:#8b5cf6;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;margin:0;}
-#root{display:flex;width:100%;height:100vh;overflow:hidden;}
+#root{display:flex;width:100%;height:100vh;overflow:hidden;zoom:1.5;}
 
 .sidebar{width:210px;min-width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;}
 .logo{padding:16px 14px 12px;border-bottom:1px solid var(--border);}
