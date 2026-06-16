@@ -12,7 +12,7 @@ from routes.dashboard import dashboard_bp
 from routes.reminders import reminders_bp
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://localhost:3000"])
+CORS(app, origins="*")
 
 app.register_blueprint(leads_bp, url_prefix="/api/leads")
 app.register_blueprint(interactions_bp, url_prefix="/api")
