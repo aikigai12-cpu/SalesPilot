@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, send_file
 from db import supabase
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.datavalidation import DataValidation
+from openpyxl.worksheet.datavalidation import DataValidation
 import io
 
 bulk_bp = Blueprint("bulk", __name__)
