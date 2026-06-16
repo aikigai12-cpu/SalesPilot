@@ -53,11 +53,14 @@ def add_lead():
     result = supabase.table("leads").insert(row).execute()
     lead = result.data[0]
 
-    # auto-assign to Future Cohort
-    future = supabase.table("cohorts").select("id").eq("is_future", True).single().execute().data
-    if future:
+    # assign to selected cohort, or fall back to Future Cohort
+    cohort_id = body.get("cohort_id")
+    if not cohort_id:
+        future = supabase.table("cohorts").select("id").eq("is_future", True).limit(1).execute().data
+        cohort_id = future[0]["id"] if future else None
+    if cohort_id:
         supabase.table("cohort_leads").insert({
-            "cohort_id": future["id"], "lead_id": lead["id"],
+            "cohort_id": cohort_id, "lead_id": lead["id"],
             "standing": "Interested", "status": "active"
         }).execute()
 
