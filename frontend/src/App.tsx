@@ -10,6 +10,7 @@ import AddLeadModal from './components/AddLeadModal'
 import LogCallModal from './components/LogCallModal'
 import WhatsAppModal from './components/WhatsAppModal'
 import NewCohortModal from './components/NewCohortModal'
+import BulkUploadModal from './components/BulkUploadModal'
 import { getCohorts } from './api'
 
 export interface Cohort {
@@ -33,6 +34,7 @@ export default function App() {
   const [modals, setModals] = useState<ModalState>({
     addLead: false, logCall: false, whatsapp: false, newCohort: false, activeLeadId: null
   })
+  const [bulkOpen, setBulkOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -136,6 +138,7 @@ export default function App() {
           <div><div className="topbar-title">{pageTitle()}</div></div>
           <div className="topbar-right">
             <button className="btn btn-ghost btn-sm" onClick={() => openModal('whatsapp')}>+ WhatsApp Chat</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setBulkOpen(true)}>⬆ Bulk Upload</button>
             <button className="btn btn-primary btn-sm" onClick={() => openModal('addLead')}>+ Add Lead</button>
           </div>
         </div>
@@ -173,6 +176,11 @@ export default function App() {
         open={modals.newCohort}
         onClose={() => closeModal('newCohort')}
         onSaved={() => { closeModal('newCohort'); loadCohorts() }}
+      />
+      <BulkUploadModal
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        onSaved={() => { setBulkOpen(false); window.dispatchEvent(new Event('leads-updated')) }}
       />
     </>
   )
