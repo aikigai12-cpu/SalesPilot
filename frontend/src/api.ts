@@ -28,6 +28,8 @@ export const bulkAssignCohort = (cohortId: string, leadIds: string[]) =>
   api.post(`/cohorts/${cohortId}/bulk-assign`, { lead_ids: leadIds })
 export const updateStanding = (cohortId: string, leadId: string, standing: string) =>
   api.put(`/cohorts/${cohortId}/leads/${leadId}`, { standing })
+export const trackLead = (cohortId: string, leadId: string, data: { next_followup?: string | null; quick_note?: string }) =>
+  api.patch(`/cohorts/${cohortId}/leads/${leadId}/track`, data)
 
 // Dashboard
 export const getDashboard = () => api.get('/dashboard/')

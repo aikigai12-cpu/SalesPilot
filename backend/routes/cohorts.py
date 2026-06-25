@@ -81,3 +81,29 @@ def update_standing(cohort_id, lead_id):
     body = request.json
     supabase.table("cohort_leads").update({"standing": body["standing"]}).eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute()
     return jsonify({"ok": True})
+
+
+@cohorts_bp.patch("/<cohort_id>/leads/<lead_id>/track")
+def track_lead(cohort_id, lead_id):
+    body = request.json
+    update = {}
+    if "next_followup" in body:
+        update["next_followup"] = body["next_followup"]
+    if "quick_note" in body:
+        update["quick_note"] = body["quick_note"]
+        # also save to call_logs so it appears in lead timeline
+        if body["quick_note"].strip():
+            from datetime import date
+            supabase.table("call_logs").insert({
+                "lead_id": lead_id,
+                "date": str(date.today()),
+                "duration": 0,
+                "outcome": "Note",
+                "interest_level": 5,
+                "objection": "",
+                "notes": body["quick_note"].strip(),
+                "next_followup": body.get("next_followup")
+            }).execute()
+    if update:
+        supabase.table("cohort_leads").update(update).eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute()
+    return jsonify({"ok": True})
