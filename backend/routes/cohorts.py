@@ -48,11 +48,27 @@ def cohort_leads(cohort_id):
 @cohorts_bp.post("/<cohort_id>/leads/<lead_id>")
 def assign_lead(cohort_id, lead_id):
     standing = request.json.get("standing", "Interested")
-    # remove existing assignments
-    supabase.table("cohort_leads").delete().eq("lead_id", lead_id).execute()
-    row = {"cohort_id": cohort_id, "lead_id": lead_id, "standing": standing, "status": "active"}
-    supabase.table("cohort_leads").insert(row).execute()
+    # check if already assigned to this cohort
+    existing = supabase.table("cohort_leads").select("id").eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute().data
+    if not existing:
+        row = {"cohort_id": cohort_id, "lead_id": lead_id, "standing": standing, "status": "active"}
+        supabase.table("cohort_leads").insert(row).execute()
     return jsonify({"ok": True})
+
+
+@cohorts_bp.post("/<cohort_id>/bulk-assign")
+def bulk_assign(cohort_id):
+    lead_ids = request.json.get("lead_ids", [])
+    added = 0
+    for lead_id in lead_ids:
+        existing = supabase.table("cohort_leads").select("id").eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute().data
+        if not existing:
+            supabase.table("cohort_leads").insert({
+                "cohort_id": cohort_id, "lead_id": lead_id,
+                "standing": "Interested", "status": "active"
+            }).execute()
+            added += 1
+    return jsonify({"ok": True, "added": added})
 
 
 @cohorts_bp.put("/<cohort_id>/leads/<lead_id>")

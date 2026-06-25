@@ -30,6 +30,17 @@ def list_leads():
     if cohort:
         ids = [r["lead_id"] for r in supabase.table("cohort_leads").select("lead_id").eq("cohort_id", cohort).execute().data]
         data = [d for d in data if d["id"] in ids]
+    # attach cohort memberships to each lead
+    all_cl = supabase.table("cohort_leads").select("lead_id, cohort_id, cohorts(id, name)").execute().data
+    cl_map: dict = {}
+    for cl in all_cl:
+        lid = cl["lead_id"]
+        if lid not in cl_map:
+            cl_map[lid] = []
+        if cl.get("cohorts"):
+            cl_map[lid].append({"id": cl["cohorts"]["id"], "name": cl["cohorts"]["name"]})
+    for lead in data:
+        lead["cohorts"] = cl_map.get(lead["id"], [])
     return jsonify(data)
 
 

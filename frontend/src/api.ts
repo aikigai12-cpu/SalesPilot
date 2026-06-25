@@ -23,7 +23,9 @@ export const parseWhatsapp = (leadId: string, text: string) => api.post(`/leads/
 export const getCohorts = () => api.get('/cohorts/')
 export const getCohortLeads = (cohortId: string) => api.get(`/cohorts/${cohortId}/leads`)
 export const assignCohort = (cohortId: string, leadId: string, standing?: string) =>
-  api.post(`/cohorts/${cohortId}/leads`, { lead_id: leadId, standing })
+  api.post(`/cohorts/${cohortId}/leads/${leadId}`, { standing })
+export const bulkAssignCohort = (cohortId: string, leadIds: string[]) =>
+  api.post(`/cohorts/${cohortId}/bulk-assign`, { lead_ids: leadIds })
 export const updateStanding = (cohortId: string, leadId: string, standing: string) =>
   api.put(`/cohorts/${cohortId}/leads/${leadId}`, { standing })
 
