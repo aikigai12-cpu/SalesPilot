@@ -42,6 +42,11 @@ def cohort_leads(cohort_id):
     if standing_filter:
         q = q.eq("standing", standing_filter)
     data = q.execute().data
+    # attach last call date per lead
+    for row in data:
+        lead_id = row.get("lead_id")
+        calls = supabase.table("call_logs").select("date").eq("lead_id", lead_id).order("date", desc=True).limit(1).execute().data
+        row["last_call"] = calls[0]["date"] if calls else None
     return jsonify(data)
 
 
