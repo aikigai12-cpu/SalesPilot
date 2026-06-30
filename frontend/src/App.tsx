@@ -84,7 +84,7 @@ export default function App() {
   const displayAvatar = viewingAs?.avatar || profile?.avatar || ''
 
   return (
-    <>
+    <div className="app-shell" style={{display:'flex',width:'100%',height:'100vh',overflow:'hidden'}}>
       <div className="sidebar">
         <div className="logo">
           <div className="logo-text">Sales<span>Pilot</span></div>
@@ -223,6 +223,6 @@ export default function App() {
         onSaved={() => { closeModal('newCohort'); loadCohorts() }} />
       <BulkUploadModal open={bulkOpen} onClose={() => setBulkOpen(false)}
         onSaved={() => { setBulkOpen(false); window.dispatchEvent(new Event('leads-updated')) }} />
-    </>
+    </div>
   )
 }
