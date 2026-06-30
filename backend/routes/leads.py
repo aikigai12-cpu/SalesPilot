@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from db import supabase
 from ai import calculate_score
+from auth import require_auth
 
 leads_bp = Blueprint("leads", __name__)
 
@@ -19,18 +20,19 @@ def _rescore(lead_id):
 
 
 @leads_bp.get("/")
+@require_auth
 def list_leads():
     archived = request.args.get("archived", "false") == "true"
     cohort = request.args.get("cohort")
     search = request.args.get("search", "")
-    q = supabase.table("leads").select("*").eq("archived", archived).order("score", desc=True)
+    q = supabase.table("leads").select("*").eq("archived", archived).eq("user_id", g.effective_user_id).order("score", desc=True)
     if search:
         q = q.ilike("name", f"%{search}%")
     data = q.execute().data
     if cohort:
         ids = [r["lead_id"] for r in supabase.table("cohort_leads").select("lead_id").eq("cohort_id", cohort).execute().data]
         data = [d for d in data if d["id"] in ids]
-    # attach cohort memberships to each lead
+    # attach cohort memberships
     all_cl = supabase.table("cohort_leads").select("lead_id, cohort_id, cohorts(id, name)").execute().data
     cl_map: dict = {}
     for cl in all_cl:
@@ -45,6 +47,7 @@ def list_leads():
 
 
 @leads_bp.post("/")
+@require_auth
 def add_lead():
     body = request.json
     row = {
@@ -59,12 +62,12 @@ def add_lead():
         "score": 40,
         "score_reason": "New lead — no interactions yet.",
         "ai_recommendation": "Log a call or WhatsApp to get AI scoring.",
-        "archived": False
+        "archived": False,
+        "user_id": g.effective_user_id
     }
     result = supabase.table("leads").insert(row).execute()
     lead = result.data[0]
 
-    # assign to selected cohort, or fall back to Future Cohort
     cohort_id = body.get("cohort_id")
     if not cohort_id:
         future = supabase.table("cohorts").select("id").eq("is_future", True).limit(1).execute().data
@@ -79,6 +82,7 @@ def add_lead():
 
 
 @leads_bp.get("/<lead_id>")
+@require_auth
 def get_lead(lead_id):
     lead = supabase.table("leads").select("*").eq("id", lead_id).single().execute().data
     calls = supabase.table("call_logs").select("*").eq("lead_id", lead_id).order("date", desc=True).execute().data
@@ -88,6 +92,7 @@ def get_lead(lead_id):
 
 
 @leads_bp.put("/<lead_id>")
+@require_auth
 def update_lead(lead_id):
     body = request.json
     supabase.table("leads").update(body).eq("id", lead_id).execute()
@@ -95,6 +100,7 @@ def update_lead(lead_id):
 
 
 @leads_bp.post("/<lead_id>/archive")
+@require_auth
 def archive_lead(lead_id):
     supabase.table("leads").update({"archived": True}).eq("id", lead_id).execute()
     return jsonify({"ok": True})

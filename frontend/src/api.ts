@@ -1,7 +1,20 @@
 import axios from 'axios'
+import { supabase } from './supabase'
 
 const BASE = import.meta.env.VITE_API_URL || '/api'
 const api = axios.create({ baseURL: BASE })
+
+// attach auth token + optional view_as on every request
+api.interceptors.request.use(async config => {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session?.access_token) {
+    config.headers['Authorization'] = `Bearer ${session.access_token}`
+  }
+  // admin viewing another user's data
+  const viewAs = sessionStorage.getItem('view_as_user_id')
+  if (viewAs) config.headers['X-View-As'] = viewAs
+  return config
+})
 
 export default api
 
@@ -38,3 +51,6 @@ export const getDashboard = () => api.get('/dashboard/')
 export const getReminders = () => api.get('/reminders/')
 export const snoozeReminder = (id: string, days?: number) => api.post(`/reminders/${id}/snooze`, { days })
 export const dismissReminder = (id: string) => api.post(`/reminders/${id}/dismiss`)
+
+// Admin
+export const getAdminUsers = () => api.get('/admin/users')
