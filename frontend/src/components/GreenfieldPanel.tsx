@@ -121,12 +121,19 @@ function FullResults({ data }: { data: Record<string, unknown> }) {
   const d9 = data.stage_9 as Record<string, string> | undefined
   const d11 = data.stage_11 as Record<string, string> | undefined
 
+  const noData = (label: string) => (
+    <div style={{ ...cardStyle, opacity: 0.45, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ ...cardTitleStyle, marginBottom: 0 }}>{label}</div>
+      <div style={{ fontSize: 11, color: 'var(--yellow)' }}>⚠ Needs online presence</div>
+    </div>
+  )
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {d0 && (
+      {d0 && s(d0.note) && (
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Stage 0 — Identity confirmed</div>
-          <div style={{ fontSize: 13 }}>{s(d0.business_name)} · {s(d0.note)}</div>
+          <div style={{ fontSize: 12 }}>{s(d0.business_name)} {s(d0.note) ? `· ${s(d0.note)}` : ''}</div>
         </div>
       )}
       {d05 && (
@@ -134,64 +141,67 @@ function FullResults({ data }: { data: Record<string, unknown> }) {
           <div style={{ ...cardTitleStyle, color: 'var(--accent)' }}>
             <span>⚡</span> Stage 0.5 — Trigger radar · Why now score: {d05.score}/10
           </div>
-          {d05.triggers?.map((t, i) => (
-            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
-              <span style={{ background: t.level === 'HIGH' ? 'var(--red)' : t.level === 'MED' ? 'var(--orange)' : 'var(--text3)', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>{t.level}</span>
-              <div style={{ fontSize: 13, lineHeight: 1.5 }}>{t.reason}</div>
-            </div>
-          ))}
+          {d05.triggers?.length > 0
+            ? d05.triggers.map((t, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 5 }}>
+                  <span style={{ background: t.level === 'HIGH' ? 'var(--red)' : t.level === 'MED' ? 'var(--orange)' : 'var(--text3)', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' }}>{t.level}</span>
+                  <div style={{ fontSize: 12, lineHeight: 1.5 }}>{t.reason}</div>
+                </div>
+              ))
+            : <div style={{ fontSize: 12, color: 'var(--text3)' }}>No specific triggers detected with available data.</div>
+          }
         </div>
       )}
-      {d1 && (
+      {d1 && s(d1.route) ? (
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Stage 1 — Warm path</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6 }}>{s(d1.route)}</div>
-          {!!d1.action && <div style={{ fontSize: 12, color: 'var(--green)', marginTop: 6 }}>→ {s(d1.action)}</div>}
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>{s(d1.route)}</div>
+          {!!d1.action && <div style={{ fontSize: 11, color: 'var(--green)', marginTop: 5 }}>→ {s(d1.action)}</div>}
         </div>
-      )}
-      {d4 && (
+      ) : d1 ? noData('Stage 1 — Warm path') : null}
+      {d4 && d4.pain_points?.length > 0 ? (
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Stage 4 — Business pain points</div>
-          {d4.pain_points?.map((p, i) => <div key={i} style={{ fontSize: 13, marginBottom: 3 }}>• {p}</div>)}
-          {d4.opportunity && <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6 }}>{d4.opportunity}</div>}
+          {d4.pain_points.map((p, i) => <div key={i} style={{ fontSize: 12, marginBottom: 3 }}>• {p}</div>)}
+          {d4.opportunity && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 5 }}>{d4.opportunity}</div>}
         </div>
-      )}
-      {d5 && (
+      ) : d4 ? noData('Stage 4 — Business pain points') : null}
+      {d5 && s(d5.signal) ? (
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Stage 5 — Hiring signals</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6 }}>{s(d5.signal)}</div>
-          {!!d5.pitch_angle && <div style={{ fontSize: 12, color: 'var(--green)', marginTop: 6 }}>→ {s(d5.pitch_angle)}</div>}
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>{s(d5.signal)}</div>
+          {!!d5.pitch_angle && <div style={{ fontSize: 11, color: 'var(--green)', marginTop: 5 }}>→ {s(d5.pitch_angle)}</div>}
         </div>
-      )}
-      {d7 && (
+      ) : d5 ? noData('Stage 5 — Hiring signals') : null}
+      {d7 && s(d7.communication_style) ? (
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Stage 7 — Leadership style</div>
-          <div style={{ fontSize: 13, marginBottom: 6 }}>Style: {d7.communication_style}</div>
-          {d7.priorities?.map((p, i) => <div key={i} style={{ fontSize: 13, marginBottom: 3 }}>• {p}</div>)}
-          {d7.trust_builder && <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6 }}>Trust builder: {d7.trust_builder}</div>}
+          <div style={{ fontSize: 12, marginBottom: 5 }}>Style: {d7.communication_style}</div>
+          {d7.priorities?.map((p, i) => <div key={i} style={{ fontSize: 12, marginBottom: 3 }}>• {p}</div>)}
+          {d7.trust_builder && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 5 }}>Trust builder: {d7.trust_builder}</div>}
         </div>
-      )}
+      ) : d7 ? noData('Stage 7 — Leadership style') : null}
       {d55 && (
         <div style={{ ...cardStyle, borderLeft: `3px solid ${d55.passed ? 'var(--green)' : 'var(--yellow)'}` }}>
           <div style={cardTitleStyle}>{d55.passed ? '✅' : '⚠️'} Stage 5.5 — Earned right — {d55.passed ? 'PASSED' : 'NOT YET'}</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6 }}>{d55.reason}</div>
-          {d55.insight && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>Insight: {d55.insight}</div>}
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>{d55.reason}</div>
+          {d55.insight && <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 4 }}>Insight: {d55.insight}</div>}
         </div>
       )}
-      {d9 && (
+      {d9 && (d9.objection || d9.root_cause) && (
         <div style={cardStyle}>
           <div style={cardTitleStyle}><span>💬</span> Stage 9 — Objection prediction</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 5 }}>
             {d9.objection && <span style={{ background: 'var(--red)', color: '#fff', fontSize: 11, padding: '2px 7px', borderRadius: 4, whiteSpace: 'nowrap' }}>{d9.objection}</span>}
-            <div style={{ fontSize: 13, lineHeight: 1.5 }}>{d9.root_cause}</div>
+            <div style={{ fontSize: 12, lineHeight: 1.5 }}>{d9.root_cause}</div>
           </div>
-          {d9.counter && <div style={{ fontSize: 12, color: 'var(--green)' }}>→ {d9.counter}</div>}
+          {d9.counter && <div style={{ fontSize: 11, color: 'var(--green)' }}>→ {d9.counter}</div>}
         </div>
       )}
-      {d11 && (
+      {d11 && s(d11.message) && (
         <div style={cardStyle}>
           <div style={cardTitleStyle}><span>📞</span> Stage 11 — Opening message</div>
-          <div style={{ background: 'var(--bg4)', borderRadius: 8, padding: '12px 14px', fontSize: 13, lineHeight: 1.7, fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ background: 'var(--bg4)', borderRadius: 7, padding: '9px 11px', fontSize: 12, lineHeight: 1.6, fontStyle: 'italic', marginBottom: 7 }}>
             "{d11.message}"
           </div>
           {d11.based_on && <div style={{ display: 'flex', gap: 5, fontSize: 11, color: 'var(--text3)' }}><span>ℹ</span><span>Based on: {d11.based_on}</span></div>}
@@ -343,6 +353,11 @@ export default function GreenfieldPanel({ leadId, score, calls, waLogs, onLogCal
             ))}
           </div>
 
+          {!website && !linkedin && !instagram && (
+            <div style={{ background: 'color-mix(in srgb, var(--yellow) 10%, var(--bg3))', border: '1px solid color-mix(in srgb, var(--yellow) 30%, transparent)', borderRadius: 7, padding: '8px 11px', fontSize: 11, color: 'var(--yellow)', marginBottom: 10 }}>
+              ⚠ Stages 1, 4, 5, 7 need website or LinkedIn to give real results. Add at least one above, or only Stage 0.5, 5.5, 9, 11 will have content.
+            </div>
+          )}
           <button className="btn btn-primary" style={{ width: '100%', padding: '12px 0', marginBottom: 12 }} onClick={runFull} disabled={loading || selectedStages.length === 0}>
             {loading ? '🤖 Researching...' : `Run ${selectedStages.length} selected rules`}
           </button>
