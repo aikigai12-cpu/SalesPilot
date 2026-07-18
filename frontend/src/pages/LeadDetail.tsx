@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getLead, getCallLogs, getWhatsappLogs, addCallLog, parseWhatsapp } from '../api'
+import GreenfieldPanel from '../components/GreenfieldPanel'
 
 interface Lead {
   id: string; name: string; phone: string; whatsapp?: string
@@ -273,6 +274,16 @@ export default function LeadDetail({ openModal }: Props) {
                 <button className="btn btn-primary" onClick={() => setTab('call')}>+ Log Call</button>
                 <button className="btn btn-ghost" onClick={() => setTab('whatsapp')}>+ WhatsApp Chat</button>
               </div>
+            </div>
+
+            <div className="card" style={{marginTop:8}}>
+              <div className="card-title">🔍 Greenfield Research</div>
+              <GreenfieldPanel
+                leadId={id!}
+                score={lead.score}
+                calls={calls}
+                waLogs={waLogs}
+              />
             </div>
           </div>
         </div>

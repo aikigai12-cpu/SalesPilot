@@ -12,6 +12,7 @@ from routes.dashboard import dashboard_bp
 from routes.reminders import reminders_bp
 from routes.bulk import bulk_bp
 from routes.admin import admin_bp
+from routes.greenfield import greenfield_bp
 
 app = Flask(__name__)
 CORS(app, origins="*")
@@ -23,6 +24,7 @@ app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(reminders_bp, url_prefix="/api/reminders")
 app.register_blueprint(bulk_bp, url_prefix="/api/bulk")
 app.register_blueprint(admin_bp, url_prefix="/api/admin")
+app.register_blueprint(greenfield_bp, url_prefix="/api")
 
 
 @app.get("/api/health")

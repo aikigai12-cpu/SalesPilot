@@ -54,3 +54,7 @@ export const dismissReminder = (id: string) => api.post(`/reminders/${id}/dismis
 
 // Admin
 export const getAdminUsers = () => api.get('/admin/users')
+
+// Greenfield
+export const getQuickAnalysis = (leadId: string) => api.post(`/leads/${leadId}/quick-analysis`)
+export const getFullResearch = (leadId: string, data: Record<string, unknown>) => api.post(`/leads/${leadId}/full-research`, data)
