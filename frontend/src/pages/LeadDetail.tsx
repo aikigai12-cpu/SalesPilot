@@ -18,8 +18,8 @@ interface WALog {
 }
 
 const avColors = ['#2563eb','#16a34a','#ea580c','#9333ea']
-function avColor(name: string) { return avColors[name.charCodeAt(0) % 4] }
-function initials(name: string) { return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() }
+function avColor(name: string) { return avColors[((name||'A').charCodeAt(0)) % 4] }
+function initials(name: string) { return (name||'?').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase() || '?' }
 function scoreColor(score: number) { return score>=70?'var(--green)':score>=40?'var(--yellow)':'var(--red)' }
 
 interface Props { openModal: (name: 'addLead'|'logCall'|'whatsapp'|'newCohort', leadId?: string) => void }
