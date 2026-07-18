@@ -16,7 +16,10 @@ def list_cohorts():
     uid = g.effective_user_id
     user_leads = _user_lead_ids(uid)
 
-    data = supabase.table("cohorts").select("*").order("start_date", desc=True).execute().data
+    all_cohorts = supabase.table("cohorts").select("*").order("start_date", desc=True).execute().data
+    # show: future cohort (user_id IS NULL) + cohorts owned by this user
+    data = [c for c in all_cohorts if c.get("user_id") is None or c.get("user_id") == uid]
+
     result = []
     for c in data:
         if user_leads:
@@ -43,7 +46,8 @@ def create_cohort():
         "name": body["name"],
         "start_date": body.get("start_date"),
         "is_active": body.get("is_active", False),
-        "is_future": body.get("is_future", False)
+        "is_future": body.get("is_future", False),
+        "user_id": None if body.get("is_future") else g.effective_user_id
     }
     data = supabase.table("cohorts").insert(row).execute()
     return jsonify(data.data[0]), 201
