@@ -7,7 +7,10 @@ cohorts_bp = Blueprint("cohorts", __name__)
 
 def _user_lead_ids(uid):
     rows = supabase.table("leads").select("id").eq("user_id", uid).execute().data
-    print(f"[cohorts] user={uid} lead_count={len(rows)}", flush=True)
+    # debug: show all distinct user_ids stored in leads
+    all_uids = supabase.table("leads").select("user_id").execute().data
+    distinct = list(set(r["user_id"] for r in all_uids if r.get("user_id")))
+    print(f"[cohorts] auth_uid={uid} lead_count={len(rows)} stored_uids={distinct}", flush=True)
     return [r["id"] for r in rows]
 
 
