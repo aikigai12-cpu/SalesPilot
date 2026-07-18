@@ -5,24 +5,31 @@ from auth import require_auth
 cohorts_bp = Blueprint("cohorts", __name__)
 
 
+def _user_lead_ids(uid):
+    rows = supabase.table("leads").select("id").eq("user_id", uid).execute().data
+    return [r["id"] for r in rows]
+
+
 @cohorts_bp.get("/")
 @require_auth
 def list_cohorts():
     uid = g.effective_user_id
-    user_lead_ids = [l["id"] for l in supabase.table("leads").select("id").eq("user_id", uid).execute().data]
+    user_leads = _user_lead_ids(uid)
 
     data = supabase.table("cohorts").select("*").order("start_date", desc=True).execute().data
     result = []
     for c in data:
-        all_cl = supabase.table("cohort_leads").select("*, leads(name,score,user_id)").eq("cohort_id", c["id"]).execute().data
-        leads = [cl for cl in all_cl if cl.get("leads") and cl["leads"].get("user_id") == uid]
-        c["lead_count"] = len(leads)
+        if user_leads:
+            cl_rows = supabase.table("cohort_leads").select("*").eq("cohort_id", c["id"]).in_("lead_id", user_leads).execute().data
+        else:
+            cl_rows = []
+        c["lead_count"] = len(cl_rows)
         c["standings"] = {
-            "Confirmed": sum(1 for l in leads if l["standing"] == "Confirmed"),
-            "Promised": sum(1 for l in leads if l["standing"] == "Promised"),
-            "Interested": sum(1 for l in leads if l["standing"] == "Interested"),
-            "At Risk": sum(1 for l in leads if l["standing"] == "At Risk"),
-            "Cold": sum(1 for l in leads if l["standing"] == "Cold"),
+            "Confirmed": sum(1 for l in cl_rows if l["standing"] == "Confirmed"),
+            "Promised":  sum(1 for l in cl_rows if l["standing"] == "Promised"),
+            "Interested":sum(1 for l in cl_rows if l["standing"] == "Interested"),
+            "At Risk":   sum(1 for l in cl_rows if l["standing"] == "At Risk"),
+            "Cold":      sum(1 for l in cl_rows if l["standing"] == "Cold"),
         }
         result.append(c)
     return jsonify(result)
@@ -46,13 +53,17 @@ def create_cohort():
 @require_auth
 def cohort_leads(cohort_id):
     uid = g.effective_user_id
+    user_leads = _user_lead_ids(uid)
     standing_filter = request.args.get("standing")
-    q = supabase.table("cohort_leads").select("*, leads(*)").eq("cohort_id", cohort_id)
+
+    if not user_leads:
+        return jsonify([])
+
+    q = supabase.table("cohort_leads").select("*, leads(*)").eq("cohort_id", cohort_id).in_("lead_id", user_leads)
     if standing_filter:
         q = q.eq("standing", standing_filter)
-    all_data = q.execute().data
-    # filter to only this user's leads
-    data = [row for row in all_data if row.get("leads") and row["leads"].get("user_id") == uid]
+    data = q.execute().data
+
     for row in data:
         lead_id = row.get("lead_id")
         calls = supabase.table("call_logs").select("date").eq("lead_id", lead_id).order("date", desc=True).limit(1).execute().data
@@ -64,8 +75,7 @@ def cohort_leads(cohort_id):
 @require_auth
 def assign_lead(cohort_id, lead_id):
     uid = g.effective_user_id
-    lead = supabase.table("leads").select("user_id").eq("id", lead_id).single().execute().data
-    if not lead or lead.get("user_id") != uid:
+    if lead_id not in _user_lead_ids(uid):
         return jsonify({"error": "Not found"}), 404
     standing = request.json.get("standing", "Interested")
     existing = supabase.table("cohort_leads").select("id").eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute().data
@@ -78,11 +88,11 @@ def assign_lead(cohort_id, lead_id):
 @require_auth
 def bulk_assign(cohort_id):
     uid = g.effective_user_id
+    user_leads = set(_user_lead_ids(uid))
     lead_ids = request.json.get("lead_ids", [])
     added = 0
     for lead_id in lead_ids:
-        lead = supabase.table("leads").select("user_id").eq("id", lead_id).single().execute().data
-        if not lead or lead.get("user_id") != uid:
+        if lead_id not in user_leads:
             continue
         existing = supabase.table("cohort_leads").select("id").eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute().data
         if not existing:
@@ -98,8 +108,7 @@ def bulk_assign(cohort_id):
 @require_auth
 def update_standing(cohort_id, lead_id):
     uid = g.effective_user_id
-    lead = supabase.table("leads").select("user_id").eq("id", lead_id).single().execute().data
-    if not lead or lead.get("user_id") != uid:
+    if lead_id not in _user_lead_ids(uid):
         return jsonify({"error": "Not found"}), 404
     body = request.json
     supabase.table("cohort_leads").update({"standing": body["standing"]}).eq("cohort_id", cohort_id).eq("lead_id", lead_id).execute()
@@ -110,8 +119,7 @@ def update_standing(cohort_id, lead_id):
 @require_auth
 def track_lead(cohort_id, lead_id):
     uid = g.effective_user_id
-    lead = supabase.table("leads").select("user_id").eq("id", lead_id).single().execute().data
-    if not lead or lead.get("user_id") != uid:
+    if lead_id not in _user_lead_ids(uid):
         return jsonify({"error": "Not found"}), 404
     body = request.json
     update = {}
