@@ -29,9 +29,9 @@ function s(v: unknown): string { return v ? String(v) : '' }
 const cardStyle: CSSProperties = {
   background: 'var(--bg3)',
   border: '1px solid var(--border2)',
-  borderRadius: 10,
-  padding: '14px 16px',
-  marginBottom: 10,
+  borderRadius: 8,
+  padding: '9px 11px',
+  marginBottom: 7,
 }
 
 const cardTitleStyle: CSSProperties = {
@@ -58,7 +58,7 @@ function QuickResults({ data }: { data: Record<string, unknown> }) {
         <div style={{ ...cardTitleStyle, color: 'var(--accent)' }}>
           <span>⚡</span> Why call now — Stage 0.5
         </div>
-        <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.65, color: 'var(--text)' }}>
+        <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text)' }}>
           {s(data.why_now)}
         </div>
       </div>
@@ -96,7 +96,7 @@ function QuickResults({ data }: { data: Record<string, unknown> }) {
               ⚠️ Earned right not yet cleared — log more interactions first
             </div>
           )}
-          <div style={{ background: 'var(--bg4)', borderRadius: 8, padding: '12px 14px', fontSize: 13, lineHeight: 1.7, fontStyle: 'italic', color: 'var(--text)', marginBottom: 8 }}>
+          <div style={{ background: 'var(--bg4)', borderRadius: 7, padding: '9px 11px', fontSize: 12, lineHeight: 1.6, fontStyle: 'italic', color: 'var(--text)', marginBottom: 7 }}>
             "{s(op.opener)}"
           </div>
           {!!op.based_on && (
@@ -271,21 +271,21 @@ export default function GreenfieldPanel({ leadId, score, calls, waLogs, onLogCal
         <div>
           {/* Score breakdown card */}
           <div style={cardStyle}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 14 }}>Score Breakdown</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', textAlign: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 10 }}>Score Breakdown</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', textAlign: 'center', marginBottom: 8 }}>
               <div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)' }}>{score}</div>
-                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 2 }}>Overall score</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)' }}>{score}</div>
+                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 1 }}>Overall score</div>
               </div>
               <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: confidenceColor }}>{confidence}</div>
-                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 2 }}>Confidence</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: confidenceColor }}>{confidence}</div>
+                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 1 }}>Confidence</div>
               </div>
               <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)' }}>
-                  {realSignals}<span style={{ fontSize: 14, color: 'var(--text3)' }}>/{totalSignals}</span>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
+                  {realSignals}<span style={{ fontSize: 12, color: 'var(--text3)' }}>/{totalSignals}</span>
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 2 }}>Real signals</div>
+                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 1 }}>Real signals</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 5, alignItems: 'flex-start', fontSize: 11, color: 'var(--text3)' }}>
