@@ -7,6 +7,7 @@ cohorts_bp = Blueprint("cohorts", __name__)
 
 def _user_lead_ids(uid):
     rows = supabase.table("leads").select("id").eq("user_id", uid).execute().data
+    print(f"[cohorts] user={uid} lead_count={len(rows)}", flush=True)
     return [r["id"] for r in rows]
 
 
