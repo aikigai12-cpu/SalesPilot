@@ -42,7 +42,7 @@ export default function LeadDetail({ openModal }: Props) {
   const reload = () => {
     if (!id) return
     Promise.all([getLead(id), getCallLogs(id), getWhatsappLogs(id)]).then(([l,c,w]) => {
-      setLead(l.data); setCalls(c.data); setWaLogs(w.data)
+      setLead(l.data.lead ?? l.data); setCalls(c.data); setWaLogs(w.data)
     }).finally(() => setLoading(false))
   }
 
