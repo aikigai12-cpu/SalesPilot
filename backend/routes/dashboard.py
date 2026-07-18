@@ -16,14 +16,12 @@ def get_dashboard():
     hot = sum(1 for l in all_leads if l["score"] >= 70)
     drop = sum(1 for l in all_leads if l["score"] < 30)
 
-    active = supabase.table("cohorts").select("*").eq("is_active", True).execute().data
-    active_cohort = active[0] if active else None
+    # active cohort: user's own active cohort only
+    all_active = supabase.table("cohorts").select("*").eq("is_active", True).execute().data
+    active_cohort = next((c for c in all_active if c.get("user_id") == uid), None)
     active_count = 0
-    if active_cohort:
-        lead_ids = [l["id"] for l in all_leads]
-        rows = supabase.table("cohort_leads").select("id").eq("cohort_id", active_cohort["id"]).execute().data
-        active_count = sum(1 for r in rows if r.get("lead_id") in lead_ids) if lead_ids else 0
-        active_count = len(supabase.table("cohort_leads").select("id,lead_id").eq("cohort_id", active_cohort["id"]).in_("lead_id", [l["id"] for l in all_leads]).execute().data) if all_leads else 0
+    if active_cohort and all_leads:
+        active_count = len(supabase.table("cohort_leads").select("id").eq("cohort_id", active_cohort["id"]).in_("lead_id", [l["id"] for l in all_leads]).execute().data)
 
     future = supabase.table("cohorts").select("*").eq("is_future", True).execute().data
     future_cohort = future[0] if future else None
