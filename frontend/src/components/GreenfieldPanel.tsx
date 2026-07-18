@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { getQuickAnalysis, getFullResearch } from '../api'
 
 interface Props {
@@ -26,7 +26,7 @@ type Mode = 'quick' | 'full'
 
 function s(v: unknown): string { return v ? String(v) : '' }
 
-const cardStyle: React.CSSProperties = {
+const cardStyle: CSSProperties = {
   background: 'var(--bg3)',
   border: '1px solid var(--border2)',
   borderRadius: 10,
@@ -34,7 +34,7 @@ const cardStyle: React.CSSProperties = {
   marginBottom: 10,
 }
 
-const cardTitleStyle: React.CSSProperties = {
+const cardTitleStyle: CSSProperties = {
   fontSize: 10,
   fontWeight: 700,
   letterSpacing: '0.8px',
